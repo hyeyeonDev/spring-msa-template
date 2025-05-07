@@ -1,0 +1,26 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:./config-server/config-repo
+        git:
+          uri: https://github.com/hyeyeonDev/spring-config-repo
+          default-label: main
+          search-paths: config
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+management:
+  metrics:
+    enable:
+      process: false
+      system: false

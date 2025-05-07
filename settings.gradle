@@ -1,0 +1,13 @@
+rootProject.name = 'spring-msa-template'
+
+// 공용 모듈
+include 'multi-tenant-core'
+include 'security-common'
+include 'redis-common'
+
+// 이름이 제대로 입력되지 않을 경우 프로젝트 내에서 인식하지 못함.
+include 'config-server'
+include 'discovery-server'
+include 'gateway-service'
+include 'user-service'
+// 서비스 생성시마다 추가

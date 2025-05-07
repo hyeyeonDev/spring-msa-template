@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # Config Server: Spring Cloud Config Server
+  config-server:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repo:/config-repo  # 로컬 config-repo를 컨테이너 내부로 마운트
+    networks:
+      - msa-network
+
+  # Discovery Server: Spring Cloud Eureka Server
+  discovery-server:
+    build:
+      context: .
+      dockerfile: discovery-server/Dockerfile
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-server
+    networks:
+      - msa-network
+
+  # API Gateway: Spring Cloud Gateway
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - config-server
+      - discovery-server
+    networks:
+      - msa-network
+
+  # User Service: 사용자 관리 서비스
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - config-server
+      - discovery-server
+    networks:
+      - msa-network
+
+  # Raffle Service: 추첨 서비스
+#  raffle-service:
+#    build:
+#      context: ./raffle-service
+#    container_name: raffle-service
+#    ports:
+#      - "8082:8082"
+#    depends_on:
+#      - config-server
+#      - discovery-server
+#    networks:
+#      - msa-network
+
+  # Redis: 인메모리 캐시
+  redis:
+    image: redis:7.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - msa-network
+
+  # H2: 인메모리 데이터베이스
+  h2:
+    image: oscarfonts/h2
+    container_name: h2
+    ports:
+      - "1521:1521"
+      - "81:81"  # H2 웹 콘솔에 접속할 수 있는 포트
+    networks:
+      - msa-network
+
+networks:
+  msa-network:
+    driver: bridge

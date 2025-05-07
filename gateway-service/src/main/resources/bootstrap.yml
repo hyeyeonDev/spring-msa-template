@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: gateway-service  # 서비스 이름 (config-repo에서 찾을 이름)
+
+  cloud:
+    config:
+      uri: http://localhost:8888  # config-server 위치
+      fail-fast: true             # config 서버 연결 실패 시 바로 실패 처리
