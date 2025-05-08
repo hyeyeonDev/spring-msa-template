@@ -1,11 +1,11 @@
-package com.hy.user_service.dto;
+package com.hy.user_service.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-public class AuthDto {
+public class RegisterDto {
     @Getter
     @Setter
     public static class RegisterRequest {
@@ -17,9 +17,6 @@ public class AuthDto {
         @Size(min = 6, message = "Password must be at least 6 characters")
         private String password;
 
-        @NotBlank(message = "Tenant ID is required")
-        private String tenantId;
-
         @NotBlank(message = "Role is required")
         private String role;
     }
@@ -28,8 +25,6 @@ public class AuthDto {
     @Setter
     public static class RegisterResponse {
         private String username;
-        private String tenantId;
         private String role;
-        private String token; // 회원가입 후 즉시 JWT 반환 (선택적)
     }
 }

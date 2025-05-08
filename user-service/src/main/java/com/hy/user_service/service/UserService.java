@@ -1,13 +1,22 @@
 package com.hy.user_service.service;
 
 import com.hy.security_common.provider.JwtTokenProvider;
-import com.hy.user_service.dto.AuthDto;
+import com.hy.user_service.dto.auth.LoginDto;
+import com.hy.user_service.dto.auth.RegisterDto;
+import com.hy.user_service.dto.user.ProfileDto;
 import com.hy.user_service.entity.User;
+import com.hy.user_service.exception.NotFoundException;
 import com.hy.user_service.repository.UserRepository;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -15,19 +24,22 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
+
+    public LoginDto.LoginResponse loadUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return LoginDto.LoginResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .build();
+    }
 
     @Transactional
-    public AuthDto.RegisterResponse register(AuthDto.RegisterRequest request) {
+    public RegisterDto.RegisterResponse register(RegisterDto.RegisterRequest request) {
         // 중복 사용자 이름 체크
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists: " + request.getUsername());
         }
-
-//        // 테넌트 ID 유효성 검사
-//        if (!multiTenancyProperties.getTenants().containsKey(request.getTenantId())) {
-//            throw new IllegalArgumentException("Invalid tenant ID: " + request.getTenantId());
-//        }
 
         // 사용자 정보 저장
         User user = User.builder()
@@ -37,16 +49,34 @@ public class UserService {
                 .build();
         userRepository.save(user);
 
-        // JWT 토큰 생성 (선택적)
-        String token = jwtTokenProvider.generateToken(request.getUsername());
-
         // 응답 생성
-        AuthDto.RegisterResponse response = new AuthDto.RegisterResponse();
+        RegisterDto.RegisterResponse response = new RegisterDto.RegisterResponse();
         response.setUsername(request.getUsername());
-        response.setTenantId(request.getTenantId());
         response.setRole(request.getRole());
-        response.setToken(token);
         return response;
+    }
+
+    public ProfileDto.ProfileResponse getProfile(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return ProfileDto.ProfileResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
+    }
+
+    public void updateProfile(Long id, ProfileDto.ProfileRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setEmail(request.getEmail());
+        userRepository.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+        userRepository.delete(user);
     }
 
 }
