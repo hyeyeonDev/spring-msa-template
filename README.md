@@ -77,3 +77,21 @@ config-server 의 depends_on 주의!
 - 해결방법:  
   JwtTokenProvider 의 Value("${jwt.validity}")가 application.yml에서 jwt.validity 속성을 찾지 못함.
   security의 yml 에 존재하면 될줄 알았지만 사용하는 서비스 (user-service)에 존재해야함.
+
+### gateway-service 실행 에러
+#### Caused by: org.springframework.web.client.ResourceAccessException: I/O error on GET request for "http://localhost:8888/gateway-service/default": Read timed out
+``` bash
+> Task :gateway-service:compileJava UP-TO-DATE
+> Task :gateway-service:processResources UP-TO-DATE
+> Task :gateway-service:classes UP-TO-DATE
+> Task :gateway-service:com.hy.gateway_service.GatewayServiceApplication.main()
+... 
+```
+- 원인: 시간 초과 오류
+  ```bash
+  # 실행시 응답 없음
+  curl http://localhost:8888/gateway-service/test
+  lsof -i :8888
+  kill -9 [PID]
+  ```
+  8888포트 확인 시 다중 연결로 일부 연결이 제대로 닫히지 않음.

@@ -6,9 +6,12 @@ spring:
     name: config-server
   cloud:
     config:
+      enabled: true
+      import-check:
+        enable: true
       server:
-        native:
-          search-locations: file:./config-server/config-repo
+#        native:
+#          search-locations: file:./config-repo
         git:
           uri: https://github.com/hyeyeonDev/spring-config-repo
           default-label: main
@@ -20,6 +23,10 @@ eureka:
     fetch-registry: false
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
   metrics:
     enable:
       process: false

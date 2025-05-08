@@ -4,16 +4,26 @@ server:
 spring:
   application:
     name: gateway-service
+
   config:
     import: optional:configserver:http://localhost:8888
 
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
       routes:
-        - id: user-service
+        - id: user-service-test
           uri: lb://user-service
           predicates:
-            - Path=/user/**
+            - Path=/test/**
+        - id: user-service-user
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/(?<remaining>.*), /auth/${remaining}
 #        - id: raffle-service
 #          uri: lb://raffle-service
 #          predicates:
@@ -25,3 +35,9 @@ eureka:
       defaultZone: http://localhost:8761/eureka
     register-with-eureka: true
     fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway, health, info, refresh

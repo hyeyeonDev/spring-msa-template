@@ -51,7 +51,7 @@ public class SecurityCommonConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz ->
-                        authz.requestMatchers("/h2-console/**", "/test/**", "/api/v1/auth/**").permitAll()
+                        authz.requestMatchers("/h2-console/**", "/test/**", "/api/auth/**").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
